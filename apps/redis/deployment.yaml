@@ -1,0 +1,69 @@
+## init configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: redis-config
+data:
+    redis-conf: | 
+        maxmemory 2G
+        maxmemory-policy allkeys-lru
+        requirepass d2ZHSEaEhMLs
+
+---
+
+##  deploy
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: redis
+    labels:
+        app: redis
+    annotations:
+        security.alpha.kubernetes.io/unsafe-sysctls: net.core.somaxconn=65535
+spec:
+    serviceName: redis
+    replicas: 1
+    selector:
+        matchLabels:
+            app: redis
+    template:
+        metadata:
+            labels:
+                app: redis
+        spec:
+            containers:
+                - name: redis
+                  image: redis:5.0.14
+                  imagePullPolicy: IfNotPresent
+                  command:
+                      - redis-server
+                      - "/redis-conf/redis.conf"
+                  resources:
+                      limits:
+                          cpu: 1
+                          memory: 2Gi
+                      requests:
+                          cpu: 1
+                          memory: 2Gi
+                  env:
+                      - name: TZ
+                        value: Asia/Shanghai
+                      - name: MASTER
+                        value: "true"
+                  ports:
+                      - containerPort: 6379
+                  volumeMounts:
+                      - mountPath: /redis-data
+                        name: redis-data-pvc
+                      - mountPath: /redis-conf
+                        name: redis-conf
+            volumes:
+                - name: redis-data-pvc
+                  persistentVolumeClaim:
+                      claimName: redis-pvc
+                - name: redis-conf
+                  configMap:
+                      name: redis-config
+                      items:
+                          - key: redis-conf
+                            path: redis.conf

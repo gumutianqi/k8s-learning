@@ -1,0 +1,29 @@
+##  create redis-pv
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: redis-pv
+    labels:
+        type: local
+spec:
+    storageClassName: local-path
+    capacity:
+        storage: 10Gi
+    accessModes:
+        - ReadWriteMany
+    hostPath:
+        path: "/Users/larrykoo/Documents/orb/redis-pv"
+
+---
+##  create redis-pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: redis-pvc
+spec:
+    accessModes:
+        - ReadWriteMany
+    resources:
+        requests:
+            storage: 10Gi
+    volumeName: redis-pv

@@ -1,0 +1,56 @@
+## create a secret for mysql-password
+apiVersion: v1
+kind: Secret
+metadata:
+    name: mongo-password
+type: kubernetes.io/basic-auth
+stringData:
+    password: QwuZcrV5ZMiYAawAK
+
+---
+## install mysql deployment
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: mongo-standalone
+    labels:
+        app: mongo-standalone
+spec:
+    serviceName: mongo-svc
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mongo-standalone
+    template:
+        metadata:
+            labels:
+                app: mongo-standalone
+        spec:
+            containers:
+                - name: mongo-standalone
+                  image: mongo:4.4
+                  imagePullPolicy: IfNotPresent
+                  resources:
+                      limits:
+                          cpu: 1
+                          memory: 2Gi
+                  env:
+                      - name: MONGO_INITDB_ROOT_USERNAME
+                        value: root
+                      - name: MONGO_INITDB_ROOT_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: mongo-password
+                                key: password
+                  livenessProbe:
+                      tcpSocket:
+                          port: 27017
+                  ports:
+                      - containerPort: 27017
+                  volumeMounts:
+                      - name: mongo-standalone-data
+                        mountPath: /data/db
+            volumes:
+                - name: mongo-standalone-data
+                  persistentVolumeClaim:
+                      claimName: mongodb-pvc

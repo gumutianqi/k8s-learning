@@ -1,0 +1,54 @@
+## create a secret for mysql-password
+apiVersion: v1
+kind: Secret
+metadata:
+    name: mysql-password
+type: kubernetes.io/basic-auth
+stringData:
+    password: t0p8fPAck77
+
+---
+## install mysql deployment
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: mysql
+    labels:
+        app: mysql
+spec:
+    serviceName: mysql-svc
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mysql
+    template:
+        metadata:
+            labels:
+                app: mysql
+        spec:
+            containers:
+                - name: mysql
+                  image: mysql:8.1.0
+                  resources:
+                      limits:
+                          cpu: 1
+                          memory: 2Gi
+                  env:
+                      - name: MYSQL_ROOT_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: mysql-password
+                                key: password
+                  livenessProbe:
+                      tcpSocket:
+                          port: 3306
+                  ports:
+                      - containerPort: 3306
+                        name: mysql
+                  volumeMounts:
+                      - name: mysql-data
+                        mountPath: /var/lib/mysql
+            volumes:
+                - name: mysql-data
+                  persistentVolumeClaim:
+                      claimName: mysql-pvc
