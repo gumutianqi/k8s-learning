@@ -12,28 +12,28 @@ stringData:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-    name: mongo-standalone
+    name: mongo-single
     labels:
-        app: mongo-standalone
+        app: mongo-single
 spec:
     serviceName: mongo-svc
     replicas: 1
     selector:
         matchLabels:
-            app: mongo-standalone
+            app: mongo-single
     template:
         metadata:
             labels:
-                app: mongo-standalone
+                app: mongo-single
         spec:
             containers:
-                - name: mongo-standalone
+                - name: mongo-single
                   image: mongo:4.4
                   imagePullPolicy: IfNotPresent
                   resources:
                       limits:
-                          cpu: 1
-                          memory: 2Gi
+                          cpu: 0.5
+                          memory: 1Gi
                   env:
                       - name: MONGO_INITDB_ROOT_USERNAME
                         value: root
@@ -48,9 +48,9 @@ spec:
                   ports:
                       - containerPort: 27017
                   volumeMounts:
-                      - name: mongo-standalone-data
+                      - name: mongo-single-data
                         mountPath: /data/db
             volumes:
-                - name: mongo-standalone-data
+                - name: mongo-single-data
                   persistentVolumeClaim:
                       claimName: mongodb-pvc

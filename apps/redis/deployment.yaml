@@ -5,7 +5,7 @@ metadata:
     name: redis-config
 data:
     redis-conf: | 
-        maxmemory 2G
+        maxmemory 512M
         maxmemory-policy allkeys-lru
         requirepass d2ZHSEaEhMLs
 
@@ -40,11 +40,11 @@ spec:
                       - "/redis-conf/redis.conf"
                   resources:
                       limits:
-                          cpu: 1
-                          memory: 2Gi
+                          cpu: 0.5
+                          memory: 0.5Gi
                       requests:
-                          cpu: 1
-                          memory: 2Gi
+                          cpu: 0.5
+                          memory: 0.5Gi
                   env:
                       - name: TZ
                         value: Asia/Shanghai

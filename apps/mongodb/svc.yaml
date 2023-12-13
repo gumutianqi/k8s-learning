@@ -4,7 +4,7 @@ metadata:
   name: mongodb-svc
 spec:
   selector:
-    app: mongo-standalone
+    app: mongo-single
   ports:
     - protocol: TCP
       port: 17017
